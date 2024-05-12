@@ -1,0 +1,7 @@
+bin
+obj
+*.nif
+*.nitf
+out
+data
+
