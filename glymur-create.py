@@ -45,18 +45,20 @@ jp2 = glymur.Jp2k('astronaut.jp2')
 astronaut = skimage.data.astronaut()
 print(f'astronaut = {astronaut}')
 
-big_picture = []
-for i in range(0, 2):
-  for row_i, row in enumerate(astronaut):
-    if len(big_picture) <= row_i:
-      big_picture.append([])
-    for col_i, col_val in enumerate(row):
-      big_picture[row_i].append(astronaut[row_i][col_i])
+x_count = 4
+y_count = 4
 
-print(f'big_picture = {len(big_picture)}x{len(big_picture[0])}')
+final_img = numpy.zeros(((x_count * len(astronaut[0])) + 1 , (y_count * len(astronaut)) + 1, 3 ), dtype=numpy.uint8)
+
+for i in range(0, min(x_count, y_count)):
+  for row_i, row in enumerate(astronaut):
+    for col_i, col_val in enumerate(row):
+      final_img[row_i + (i * len(astronaut)) ][col_i + (i * len(astronaut[0])) ] = astronaut[row_i][col_i]
+
+print(f'final_img = {len(final_img)}x{len(final_img[0])}')
 
 #jp2[:] = astronaut
-jp2[:] = numpy.array(big_picture)
+jp2[:] = final_img
 
 
 
