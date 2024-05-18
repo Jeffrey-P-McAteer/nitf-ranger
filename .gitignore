@@ -6,3 +6,11 @@ out
 data
 
 nitro
+pyenv
+py-env
+.pyenv
+.py-env
+
+*.jp2
+astronaut.jp2
+
