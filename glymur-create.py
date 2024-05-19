@@ -25,6 +25,17 @@ except:
   ])
   import numpy
 
+
+try:
+  import matplotlib
+except:
+  subprocess.run([
+    sys.executable, *('-m pip install matplotlib'.split()), f'--target={pyenv}'
+  ])
+  import matplotlib
+
+import matplotlib.pyplot
+
 try:
   import skimage
 except:
@@ -41,14 +52,14 @@ print(f'j2kfile = {j2kfile}')
 j2k = glymur.Jp2k(j2kfile)
 print(f'j2k = {j2k}')
 
+astronaut = skimage.data.astronaut()
+print(f'astronaut = {astronaut}')
+x_count = 4
+y_count = 4
+
+
 if not os.path.exists('astronaut.jp2'):
   jp2 = glymur.Jp2k('astronaut.jp2')
-  astronaut = skimage.data.astronaut()
-  print(f'astronaut = {astronaut}')
-
-  x_count = 4
-  y_count = 4
-
   final_img = numpy.zeros(((x_count * len(astronaut[0])) + 1 , (y_count * len(astronaut)) + 1, 3 ), dtype=numpy.uint8)
 
   for y in range(0, len(final_img)):
@@ -72,7 +83,18 @@ if not os.path.exists('astronaut.jp2'):
   jp2 = None
 
 
+# Ok, now we parse this code-stream but only to x0..x1,y0..y1
+x0 = int( ((x_count * len(astronaut[0])) / 2.0) - (len(astronaut[0]) / 2.0) )
+y0 = int( ((y_count * len(astronaut)) / 2.0) - (len(astronaut) / 2.0) )
+x1 = int( ((x_count * len(astronaut[0])) / 2.0) + (len(astronaut[0]) / 2.0) )
+y1 = int( ((y_count * len(astronaut)) / 2.0) + (len(astronaut) / 2.0) )
+w = int(x1 - x0)
+h = int(y1 - y0)
+
+out_pixels = numpy.zeros((w, h, 3), dtype=numpy.uint8)
 with open('astronaut.jp2', 'rb') as fd:
   pass
 
 
+matplotlib.pyplot.imshow(out_pixels, interpolation='nearest')
+matplotlib.pyplot.show()
