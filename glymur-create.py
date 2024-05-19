@@ -97,8 +97,12 @@ print(f'Reading the rectangle from {x0},{y0} -> {x1},{y1} ({w}x{h} pixels)')
 out_pixels = numpy.zeros((w, h, 3), dtype=numpy.uint8)
 with open('astronaut.jp2', 'rb') as fd:
   jp2_file_len = os.fstat(fd.fileno()).st_size
+
   # Ref: https://www.file-recovery.com/jp2-signature-format.htm
   # Ref: https://jpylyzer.openpreservation.org/doc/2-2/userManual.html#structure-jp2
+  # Ref: https://github.com/quintusdias/glymur/blob/cb25720ab369da3151e0a3855c7580b779878c40/tests/data/nemo.txt#L6
+  # Ref: https://gist.github.com/espresso3389/a4a7ffcc28cbd15dce61a5f45a94c3bf
+
 
   # Read first chunk length (big-endian, 4 bytes)
   fd.seek(0)
@@ -135,7 +139,16 @@ with open('astronaut.jp2', 'rb') as fd:
       jp2h_offset += 4
       print(f'  jp2h_box_len = {jp2h_box_len}, jp2h_box_type = {jp2h_box_type}')
       if jp2h_box_type == 'ihdr':
-        pass
+        ihdr_width = struct.unpack('>I', fd.read(4))[0]
+        ihdr_height = struct.unpack('>I', fd.read(4))[0]
+        ihdr_color_channels = struct.unpack('>H', fd.read(2))[0]
+        print(f'    ihdr_width = {ihdr_width}, ihdr_height = {ihdr_height}, ihdr_color_channels = {ihdr_color_channels}')
+
+        ihdr_bit_depth = struct.unpack('>B', fd.read(1))[0]
+        print(f'    ihdr_bit_depth = {ihdr_bit_depth}, ')
+
+
+
       elif jp2h_box_type == 'colr':
         pass
       # Ensure we seek to next box, no matter what the variable size of this box was
