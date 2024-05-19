@@ -98,6 +98,7 @@ out_pixels = numpy.zeros((w, h, 3), dtype=numpy.uint8)
 with open('astronaut.jp2', 'rb') as fd:
   jp2_file_len = os.fstat(fd.fileno()).st_size
   # Ref: https://www.file-recovery.com/jp2-signature-format.htm
+  # Ref: https://jpylyzer.openpreservation.org/doc/2-2/userManual.html#structure-jp2
 
   # Read first chunk length (big-endian, 4 bytes)
   fd.seek(0)
