@@ -115,13 +115,35 @@ with open('astronaut.jp2', 'rb') as fd:
   if c2_type == 'ftyp':
     # Parse sub-type at offset 8
     c2_sub_type = b''.join(struct.unpack('cccc', fd.read(4))).decode('utf-8')
-    print(f'c2_sub_type = {c2_sub_type}')
+    print(f'  c2_sub_type = {c2_sub_type}')
+    c2_sub_type_unk_num = struct.unpack('>I', fd.read(4))[0]
+    print(f'  c2_sub_type_unk_num = {c2_sub_type_unk_num}')
 
 
   fd.seek(c1_len + c2_len)
   c3_len = struct.unpack('>I', fd.read(4))[0]
   c3_type = b''.join(struct.unpack('cccc', fd.read(4))).decode('utf-8')
   print(f'c3_len = {c3_len}, c3_type = {c3_type}')
+
+  # Parse jp2h sub-boxes out
+  if c3_type == 'jp2h':
+    jp2h_offset = 0
+    while jp2h_offset < c3_len:
+      jp2h_box_len = struct.unpack('>I', fd.read(4))[0]
+      jp2h_offset += 4
+      jp2h_box_type = b''.join(struct.unpack('cccc', fd.read(4))).decode('utf-8')
+      jp2h_offset += 4
+      print(f'  jp2h_box_len = {jp2h_box_len}, jp2h_box_type = {jp2h_box_type}')
+      if jp2h_box_type == 'ihdr':
+        pass
+      elif jp2h_box_type == 'colr':
+        pass
+      # Ensure we seek to next box, no matter what the variable size of this box was
+      if jp2h_box_len-8 > 0:
+        jp2h_offset += jp2h_box_len
+        fd.seek(c1_len + c2_len + jp2h_offset)
+
+
 
   fd.seek(c1_len + c2_len + c3_len)
   c4_len = struct.unpack('>I', fd.read(4))[0]
