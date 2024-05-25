@@ -113,13 +113,28 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
   printf("jp2_meth=%d jp2_precedence=%d jp2_approx=%d\n", jp2_meth, jp2_precedence, jp2_approx);
 
-  if (jp2_meth == 1) {
+  if (jp2_meth == 1) { // Enumerated color space
     uint32_t jp2_EnumCS = UINT32_BE(jp2_bytes, colr_offset + 11);
-
     printf("jp2_EnumCS=%d\n", jp2_EnumCS);
+    /* // jp2_EnumCS is the enumerated color-space being used, with the following possible values
+    CMYK = 12
+    SRGB = 16
+    GREYSCALE = 17
+    YCC = 18
+    E_SRGB = 20
+    ROMM_RGB = 21
+    */
+    if (jp2_EnumCS == 14) { // CIELab?
 
+    }
+    else if (jp2_EnumCS == 16) { // SRGB
+
+    }
+    else {
+      printf("Warning: %s has unknown jp2_EnumCS = %d (expected 14 or 16)!\n", jp2_file, jp2_EnumCS);
+    }
   }
-  else if (jp2_meth == 2) {
+  else if (jp2_meth == 2) { // ICC Profile color space
 
   }
   else {
