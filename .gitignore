@@ -14,3 +14,5 @@ py-env
 *.jp2
 astronaut.jp2
 
+jp2_ranged_reader
+
