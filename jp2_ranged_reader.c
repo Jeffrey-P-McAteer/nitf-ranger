@@ -83,12 +83,22 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
   printf("ihdr_offset=%ld ihdr_len=%d\n", ihdr_offset, ihdr_len);
 
-  size_t jp2_width = UINT32_BE(jp2_bytes, ihdr_offset + 8);
-  size_t jp2_height = UINT32_BE(jp2_bytes, ihdr_offset + 12);
+  size_t jp2_width =            UINT32_BE(jp2_bytes, ihdr_offset + 8);
+  size_t jp2_height =           UINT32_BE(jp2_bytes, ihdr_offset + 12);
   uint16_t jp2_num_components = UINT16_BE(jp2_bytes, ihdr_offset + 16);
   uint8_t jp2_bits_per_component = jp2_bytes[ihdr_offset + 18];
+  uint8_t jp2_compression_type =   jp2_bytes[ihdr_offset + 19];
+
+  if (jp2_compression_type != 7) {
+    printf("Error: %s does not use compression type 7! (got %d)!\n", jp2_file, jp2_compression_type);
+    return FAIL(2);
+  }
+
+  uint8_t jp2_UnkC =   jp2_bytes[ihdr_offset + 20]; // ???
+  uint8_t jp2_IPR =    jp2_bytes[ihdr_offset + 21];
 
   printf("jp2_width=%ld jp2_height=%ld jp2_num_components=%d jp2_bits_per_component=%d\n", jp2_width, jp2_height, jp2_num_components, jp2_bits_per_component);
+  printf("jp2_compression_type=%d jp2_UnkC=%d jp2_IPR=%d\n", jp2_compression_type, jp2_UnkC, jp2_IPR);
 
 
   size_t colr_offset = 0;
@@ -97,8 +107,24 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
   printf("colr_offset=%ld colr_len=%d\n", colr_offset, colr_len);
 
+  uint8_t jp2_meth =       jp2_bytes[colr_offset + 8];
+  uint8_t jp2_precedence = jp2_bytes[colr_offset + 9];
+  uint8_t jp2_approx =     jp2_bytes[colr_offset + 10];
 
+  printf("jp2_meth=%d jp2_precedence=%d jp2_approx=%d\n", jp2_meth, jp2_precedence, jp2_approx);
 
+  if (jp2_meth == 1) {
+    uint32_t jp2_EnumCS = UINT32_BE(jp2_bytes, colr_offset + 11);
+
+    printf("jp2_EnumCS=%d\n", jp2_EnumCS);
+
+  }
+  else if (jp2_meth == 2) {
+
+  }
+  else {
+    printf("Warning: %s has unknown jp2_meth = %d (expected 1 or 2)!\n", jp2_file, jp2_meth);
+  }
 
   size_t jp2c_offset = 0;
   uint32_t jp2c_len = 0;
