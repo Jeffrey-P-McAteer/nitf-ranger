@@ -102,7 +102,8 @@ with open('astronaut.jp2', 'rb') as fd:
   # Ref: https://jpylyzer.openpreservation.org/doc/2-2/userManual.html#structure-jp2
   # Ref: https://github.com/quintusdias/glymur/blob/cb25720ab369da3151e0a3855c7580b779878c40/tests/data/nemo.txt#L6
   # Ref: https://gist.github.com/espresso3389/a4a7ffcc28cbd15dce61a5f45a94c3bf
-
+  # Ref: https://vicente-gonzalez-ruiz.github.io/JPEG2000/
+  # Ref: https://web.archive.org/web/20090419051120/http://www.upatras.gr/ieee/skodras/pubs/ans-c36.pdf
 
   # Read first chunk length (big-endian, 4 bytes)
   fd.seek(0)
@@ -162,7 +163,9 @@ with open('astronaut.jp2', 'rb') as fd:
   c4_len = struct.unpack('>I', fd.read(4))[0]
   c4_type = b''.join(struct.unpack('cccc', fd.read(4))).decode('utf-8')
   print(f'c4_len = {c4_len}, c4_type = {c4_type}')
-
+  if c4_type == 'jp2c':
+    # Begin parsing code-stream!
+    pass
 
 
   fd.seek(c1_len + c2_len + c3_len + c4_len)
