@@ -16,3 +16,5 @@ astronaut.jp2
 
 jp2_ranged_reader
 
+*.out
+*.bin
