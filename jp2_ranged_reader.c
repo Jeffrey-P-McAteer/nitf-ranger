@@ -17,6 +17,7 @@
 #define FAIL(n) (n)
 
 #define UINT32_BE(bytes, offset) (bytes[offset] << 24 | bytes[offset+1] << 16 | bytes[offset+2] << 8 | bytes[offset+3] << 0)
+#define UINT16_BE(bytes, offset) (bytes[offset] << 8 | bytes[offset+1] << 0)
 
 int die(int ret_val, char* msg) {
   printf("%s\n", msg);
@@ -78,14 +79,33 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
   size_t ihdr_offset = 0;
   uint32_t ihdr_len = 0;
-  jumpto_tag("ihdr", &ihdr_offset, &ihdr_len, jp2h_offset+8, jp2_bytes, file_size); // Interior box may be parsed by jumping to the known beginning!
+  jumpto_tag("ihdr", &ihdr_offset, &ihdr_len, jp2h_offset+8, jp2_bytes, file_size); // Interior box may be parsed by jumping to the known beginning! (+8 in this case)
 
   printf("ihdr_offset=%ld ihdr_len=%d\n", ihdr_offset, ihdr_len);
 
   size_t jp2_width = UINT32_BE(jp2_bytes, ihdr_offset + 8);
   size_t jp2_height = UINT32_BE(jp2_bytes, ihdr_offset + 12);
+  uint16_t jp2_num_components = UINT16_BE(jp2_bytes, ihdr_offset + 16);
+  uint8_t jp2_bits_per_component = jp2_bytes[ihdr_offset + 18];
 
-  printf("jp2_width=%ld jp2_height=%ld\n", jp2_width, jp2_height);
+  printf("jp2_width=%ld jp2_height=%ld jp2_num_components=%d jp2_bits_per_component=%d\n", jp2_width, jp2_height, jp2_num_components, jp2_bits_per_component);
+
+
+  size_t colr_offset = 0;
+  uint32_t colr_len = 0;
+  jumpto_tag("colr", &colr_offset, &colr_len, ihdr_offset, jp2_bytes, file_size);
+
+  printf("colr_offset=%ld colr_len=%d\n", colr_offset, colr_len);
+
+
+
+
+  size_t jp2c_offset = 0;
+  uint32_t jp2c_len = 0;
+  jumpto_tag("jp2c", &jp2c_offset, &jp2c_len, jp2h_offset, jp2_bytes, file_size);
+
+  printf("jp2c_offset=%ld jp2c_len=%d\n", jp2c_offset, jp2c_len);
+
 
 
 
