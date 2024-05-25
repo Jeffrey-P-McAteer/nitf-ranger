@@ -16,6 +16,8 @@
 #define SUCCESS 0
 #define FAIL(n) (n)
 
+#define UINT32_BE(bytes, offset) (bytes[offset] << 24 | bytes[offset+1] << 16 | bytes[offset+2] << 8 | bytes[offset+3] << 0)
+
 int die(int ret_val, char* msg) {
   printf("%s\n", msg);
   return ret_val;
@@ -27,7 +29,7 @@ void jumpto_tag(char* four_letter_name, size_t* tag_offset_out, uint32_t* tag_si
     return; // fell off the file!
   }
   // Read this tag size, big-endian
-  uint32_t tag_size = jp2_bytes[jp2_offset] << 24 | jp2_bytes[jp2_offset+1] << 16 | jp2_bytes[jp2_offset+2] << 8 | jp2_bytes[jp2_offset+3] << 0;
+  uint32_t tag_size = UINT32_BE(jp2_bytes, jp2_offset);
   if (tag_size < 8) {
     // Generally impossible, exit!
     printf("WARNING: jumpto_tag(%s, ...) read an impossible tag_size of %d!\n", four_letter_name, tag_size);
@@ -68,10 +70,22 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
     return FAIL(1);
   }
 
-  size_t jp2_width = 0;
-  size_t jp2_height = 0;
+  size_t jp2h_offset = 0;
+  uint32_t jp2h_len = 0;
+  jumpto_tag("jp2h", &jp2h_offset, &jp2h_len, ftyp_offset, jp2_bytes, file_size);
 
+  printf("jp2h_offset=%ld jp2h_len=%d\n", jp2h_offset, jp2h_len);
 
+  size_t ihdr_offset = 0;
+  uint32_t ihdr_len = 0;
+  jumpto_tag("ihdr", &ihdr_offset, &ihdr_len, jp2h_offset+8, jp2_bytes, file_size); // Interior box may be parsed by jumping to the known beginning!
+
+  printf("ihdr_offset=%ld ihdr_len=%d\n", ihdr_offset, ihdr_len);
+
+  size_t jp2_width = UINT32_BE(jp2_bytes, ihdr_offset + 8);
+  size_t jp2_height = UINT32_BE(jp2_bytes, ihdr_offset + 12);
+
+  printf("jp2_width=%ld jp2_height=%ld\n", jp2_width, jp2_height);
 
 
 
