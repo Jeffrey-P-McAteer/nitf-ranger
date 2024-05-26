@@ -113,6 +113,8 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
   printf("jp2_meth=%d jp2_precedence=%d jp2_approx=%d\n", jp2_meth, jp2_precedence, jp2_approx);
 
+  uint32_t jp2_icc_profile_buf[24]; // we'll deal w/ allocations when we need more numbers, for now it looks like this will hold all possible inputs
+
   if (jp2_meth == 1) { // Enumerated color space
     uint32_t jp2_EnumCS = UINT32_BE(jp2_bytes, colr_offset + 11);
     printf("jp2_EnumCS=%d\n", jp2_EnumCS);
@@ -125,6 +127,10 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
     ROMM_RGB = 21
     */
     if (jp2_EnumCS == 14) { // CIELab?
+      jp2_icc_profile_buf[0] = 14; // Copy of jp2_EnumCS
+      jp2_icc_profile_buf[1] = 0x44454600; /* DEF */
+
+
 
     }
     else if (jp2_EnumCS == 16) { // SRGB
