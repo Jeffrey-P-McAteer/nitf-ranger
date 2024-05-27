@@ -168,6 +168,11 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
 
 
     }
+    else if (jp2_EnumCS == 17) { // GREYSCALE
+
+      jp2_icc_profile_buf[0] = 17; // Copy of jp2_EnumCS
+
+    }
     else {
       printf("Warning: %s has unknown jp2_EnumCS = %d (expected 14 or 16)!\n", jp2_file, jp2_EnumCS);
     }

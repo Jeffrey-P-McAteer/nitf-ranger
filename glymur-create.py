@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import os
 import sys
 import subprocess
@@ -80,6 +80,38 @@ if not os.path.exists('astronaut.jp2'):
 
   #jp2[:] = astronaut
   jp2[:] = final_img
+
+  print(f'jp2.colorspace = {jp2._colorspace}')
+
+  jp2 = None
+
+
+if not os.path.exists('astronaut.grey.jp2'):
+  jp2 = glymur.Jp2k('astronaut.grey.jp2', colorspace='grey')
+  final_img = numpy.zeros(((x_count * len(astronaut[0])) + 1 , (y_count * len(astronaut)) + 1, 3 ), dtype=numpy.uint8)
+
+  for y in range(0, len(final_img)):
+    for x in range(0, len(final_img[0])):
+      final_img[y][x] = (
+        numpy.uint8(255.0 * (y / len(final_img)) ),
+      )
+
+  for i in range(0, min(x_count, y_count)):
+    for row_i, row in enumerate(astronaut):
+      for col_i, col_val in enumerate(row):
+        final_img[row_i + (i * len(astronaut)) ][col_i + (i * len(astronaut[0])) ] = (
+          numpy.uint8(
+            int((255.0/3.0) * ((astronaut[row_i][col_i][0] / 255.0) + (astronaut[row_i][col_i][1] / 255.0) + (astronaut[row_i][col_i][2] / 255.0)))
+          )
+        )
+
+  print(f'(grey) final_img size = {len(final_img)}x{len(final_img[0])}')
+
+  #jp2[:] = astronaut
+  jp2[:] = final_img
+
+  print(f'(grey) jp2.colorspace = {jp2._colorspace}')
+
 
   jp2 = None
 
