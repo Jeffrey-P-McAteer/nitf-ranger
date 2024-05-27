@@ -173,6 +173,23 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
     }
   }
   else if (jp2_meth == 2) { // ICC Profile color space
+    uint32_t icc_data_len_bytes = colr_len - 3;
+    uint32_t jp2_icc_profile_buf_bytes_len = 24 * 4;
+    if (icc_data_len_bytes > jp2_icc_profile_buf_bytes_len) {
+      printf("Error: %s ICC Profile color space is too big! (got %d, only have space for up to %d bytes)!\n", jp2_file, icc_data_len_bytes, jp2_icc_profile_buf_bytes_len);
+      return FAIL(3);
+    }
+
+    for (size_t num_i = 0; num_i < 24; num_i += 1) {
+      jp2_icc_profile_buf[num_i] = 0;
+    }
+
+    for (size_t byte_i = 0; byte_i < icc_data_len_bytes; byte_i += 1) {
+      size_t num_i = byte_i / 4;
+      size_t byte_bit_offset = 8 * (3 - (byte_i % 4)); // i=0 becomes 8*3=24 bits, or highest one. i=1 becomes 8*(3-1)=8*2=16, or next lower nibble, etc.
+      size_t jp2_byte_offset = colr_offset + 11 + byte_i; // 8 for header + 3 for numbs = 11 as first byte of ICC header data
+      jp2_icc_profile_buf[num_i] |= (jp2_bytes[jp2_byte_offset] << byte_bit_offset);
+    }
 
   }
   else {
