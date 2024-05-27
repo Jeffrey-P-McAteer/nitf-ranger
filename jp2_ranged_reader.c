@@ -126,14 +126,46 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
     E_SRGB = 20
     ROMM_RGB = 21
     */
-    if (jp2_EnumCS == 14) { // CIELab?
+    if (jp2_EnumCS == 14) { // CIELab, from https://github.com/uclouvain/openjpeg/blob/70e6263705334f854a27340e34ede11a767918ed/src/lib/openjp2/jp2.c#L1518
+
       jp2_icc_profile_buf[0] = 14; // Copy of jp2_EnumCS
       jp2_icc_profile_buf[1] = 0x44454600; /* DEF */
 
+      uint32_t rl = 0;
+      uint32_t ol = 0;
+      uint32_t ra = 0;
+      uint32_t oa = 0;
+      uint32_t rb = 0;
+      uint32_t ob = 0;
+      uint32_t il = 0;
 
+      if (colr_len < 35) {
+        printf("Warning: %s has a colr_len too small for CIELab color! (got %d, need == 35)!\n", jp2_file, colr_len);
+      }
+      else {
+        jp2_icc_profile_buf[1] = 0; // clear whatever this represents, as we can read numbers down here!
+        rl = UINT32_BE(jp2_bytes, colr_offset + 11 + (1 * 4) );
+        ol = UINT32_BE(jp2_bytes, colr_offset + 11 + (2 * 4) );
+        ra = UINT32_BE(jp2_bytes, colr_offset + 11 + (3 * 4) );
+        oa = UINT32_BE(jp2_bytes, colr_offset + 11 + (4 * 4) );
+        rb = UINT32_BE(jp2_bytes, colr_offset + 11 + (5 * 4) );
+        ob = UINT32_BE(jp2_bytes, colr_offset + 11 + (6 * 4) );
+        il = UINT32_BE(jp2_bytes, colr_offset + 11 + (7 * 4) );
+      }
+
+      jp2_icc_profile_buf[2] = rl;
+      jp2_icc_profile_buf[4] = ra;
+      jp2_icc_profile_buf[6] = rb;
+      jp2_icc_profile_buf[3] = ol;
+      jp2_icc_profile_buf[5] = oa;
+      jp2_icc_profile_buf[7] = ob;
+      jp2_icc_profile_buf[8] = il;
 
     }
     else if (jp2_EnumCS == 16) { // SRGB
+
+      jp2_icc_profile_buf[0] = 16; // Copy of jp2_EnumCS
+
 
     }
     else {
@@ -146,6 +178,15 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
   else {
     printf("Warning: %s has unknown jp2_meth = %d (expected 1 or 2)!\n", jp2_file, jp2_meth);
   }
+
+  printf("jp2_icc_profile_buf[0] = %d\n", jp2_icc_profile_buf[0]);
+  printf("jp2_icc_profile_buf[1] = %d\n", jp2_icc_profile_buf[1]);
+  printf("jp2_icc_profile_buf[2] = %d\n", jp2_icc_profile_buf[2]);
+  printf("jp2_icc_profile_buf[3] = %d\n", jp2_icc_profile_buf[3]);
+  printf("jp2_icc_profile_buf[4] = %d\n", jp2_icc_profile_buf[4]);
+  printf("jp2_icc_profile_buf[5] = %d\n", jp2_icc_profile_buf[5]);
+  printf("jp2_icc_profile_buf[6] = %d\n", jp2_icc_profile_buf[6]);
+
 
   size_t jp2c_offset = 0;
   uint32_t jp2c_len = 0;
