@@ -209,6 +209,9 @@ int read_pixels_from(char* jp2_file, unsigned char* output_rgb8_buff, int x0, in
   printf("jp2_icc_profile_buf[5] = %d\n", jp2_icc_profile_buf[5]);
   printf("jp2_icc_profile_buf[6] = %d\n", jp2_icc_profile_buf[6]);
 
+  // Ok, now all the bytes in jp2_icc_profile_buf describe the color-space.
+  // We assume SRGB + GREYSCALE do not need additional data parsed out?
+
 
   size_t jp2c_offset = 0;
   uint32_t jp2c_len = 0;
